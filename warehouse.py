@@ -188,14 +188,14 @@ def create_app(test_config=None):
     @app.route('/picklists', methods=["GET"])
     def get_picklists():
         cursor = connection.cursor()
-        rows = cursor.execute("SELECT * FROM picklist")
+        rows = cursor.execute("SELECT * FROM picklist ORDER BY picklistnumber ASC, location ASC, description ASC")
 
         return render_template('picklists.html',picklist=rows)
         
     @app.route('/picklist/<picklistnumber>', methods=["GET"])
     def get_picklist(picklistnumber):
         cursor = connection.cursor()
-        rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=?", (picklistnumber))
+        rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=? ORDER BY picklistnumber ASC, location ASC, description ASC", (picklistnumber))
 
         return render_template('picklist.html',picklist=rows, picklistnumber=picklistnumber)
         
