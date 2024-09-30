@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>Items</h1>
+{% endblock %}
+
+{% block content %}
+<form method="GET" action="">
+    <label for="search">Search:</label><br>
+    <input type="text" id="search" name="search" value="{{ request.args.get('search', '') }}">
+    <button type="submit">Search</button>
+</form>
+<br>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set search_query = request.args.get('search', '') %}
+        {% for i in items %}
+            {% if search_query in i[0] or search_query in i[1] %}
+            <tr>
+                <td>{{ i[0] }}</td>
+                <td>{{ i[1] }}</td>
+                <td>{{ i[2] }}</td>
+                <td> <a href="/item/delete/{{ i[0] }}/{{ i[1] }}"> <button type="button" class="btn btn-danger">Delete!</button> </a> </td>
+                <td> <a href="/item/increase/{{ i[0] }}/{{ i[1] }}"> <button type="button">Add One!</button> </a> </td>
+                <td> <a href="/item/decrease/{{ i[0] }}/{{ i[1] }}"> <button type="button">Remove One!</button> </a> </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+

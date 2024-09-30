@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>Items</h1>
+{% endblock %}
+
+{% block content %}
+       {% for i in users %}
+
+           {{ i[0] }} - {{ i[1] }} 
+           <hr/>
+
+    {% endfor %}
+{% endblock %}

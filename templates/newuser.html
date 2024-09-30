@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>Create Account</h1>
+{% endblock %}
+
+{% block content %}
+  <form id="userForm" action="/user/new" method="post">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br>
+
+    <label for="confirmpassword">Confirm Password:</label><br>
+    <input type="password" id="confirmpassword" name="confirmpassword" required><br><br>
+
+    <button type="button" id="createButton" class="btn btn-danger" onclick="submitForm()">Create</button>
+  </form>
+
+  <script>
+    function validateForm() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmpassword').value;
+      const createButton = document.getElementById('createButton');
+
+      if (!username || !password || !confirmPassword) {
+        createButton.className = "btn btn-danger";
+        return false;
+      }
+
+      if (password !== confirmPassword) {
+        createButton.className = "btn btn-danger";
+        return false;
+      }
+
+      createButton.className = "btn btn-primary";
+      return true;
+    }
+
+    function submitForm() {
+      if (validateForm()) {
+        document.getElementById('userForm').submit();
+      }
+    }
+
+    document.getElementById('username').addEventListener('input', validateForm);
+    document.getElementById('password').addEventListener('input', validateForm);
+    document.getElementById('confirmpassword').addEventListener('input', validateForm);
+  </script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>Picklist</h1>
+{% endblock %}
+
+{% block content %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Picklistnumber</th>
+            <th>username</th>
+            <th>location</th>
+            <th>description</th>
+            <th>amount</th>
+            <th>collected</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in picklist %}
+        <tr>
+            <td><a href="/picklist/{{ i[0] }}">{{ i[0] }}</a></td>
+            <td>{{ i[1] }}</td>
+            <td>{{ i[2] }}</td>
+            <td>{{ i[3] }}</td>
+            <td>{{ i[4] }}</td>
+            <td>{{ i[5] }}</td>
+            <td> <a href=/picklist/delete/{{ i[0] }}/{{ i[2] }}/{{ i[3] }}> <button type="button">Delete!</button> </a> </td>
+            <td> <a href=/picklist/increase/{{ i[0] }}/{{ i[2] }}/{{ i[3] }}> <button type="button">Add One!</button> </a> </td>
+            <td> <a href=/picklist/decrease/{{ i[0] }}/{{ i[2] }}/{{ i[3] }}> <button type="button">Remove One!</button> </a> </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
