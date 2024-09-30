@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 
 import sqlite3
 
@@ -8,6 +8,7 @@ import sqlite3
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    app.secret_key = "ThisShouldBeRandomOrChanged"
     #app.config.from_mapping(
     #    SECRET_KEY='dev',
     #    DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
@@ -38,7 +39,7 @@ def create_app(test_config=None):
     @app.route('/items', methods=["GET"])
     def get_items():
         cursor = connection.cursor()
-        rows = cursor.execute("SELECT * FROM warehouseitems")
+        rows = cursor.execute("SELECT * FROM warehouseitems ORDER BY location ASC, description ASC")
 
         return render_template('items.html',items=rows)
 
@@ -50,11 +51,27 @@ def create_app(test_config=None):
     def item_new_post():
         location = request.form.get("location")
         description = request.form.get("description")
-        amount = request.form.get("amount")
-       
-        print(location, description, amount)
+        
+        try:
+           amount = int(request.form.get("amount"))
+        except:
+           flash("Amount must be an integer")
+           return redirect("/item/new")
+           
+        if amount<1:
+           flash("Amount must be at least 1")
+           return redirect("/item/new")
+                 
         
         cursor = connection.cursor()
+        
+        sql = '''SELECT Count() FROM warehouseitems WHERE location=? AND description=?'''
+        cursor.execute(sql, (location,description))
+        numberOfRows = cursor.fetchone()[0]
+        
+        if numberOfRows != 0:
+           flash("Item "+description+" already exists at location "+location)
+           return redirect("/items")
         
         sql='''INSERT INTO warehouseitems(location,description,amount) VALUES (?,?,?)'''
 
@@ -100,13 +117,14 @@ def create_app(test_config=None):
         
         old_amount = result[0]
         print("Result is ",old_amount)
-        new_amount = old_amount - 1
-        print("New amount is ",new_amount)
         
-        sql='''UPDATE warehouseitems SET amount=? WHERE  location=? AND description=?'''
-        
-        result = cursor.execute(sql, (new_amount, loc, des ))
-        connection.commit()       
+        if old_amount==1:
+           flash("Can't reduce the number of item below 1. Use delete instead")
+        else:
+           new_amount = old_amount - 1
+           sql='''UPDATE warehouseitems SET amount=? WHERE  location=? AND description=?'''
+           result = cursor.execute(sql, (new_amount, loc, des ))
+           connection.commit()       
                 
         return redirect("/items")
        
@@ -121,6 +139,7 @@ def create_app(test_config=None):
         rows = cursor.execute("SELECT * FROM users")
 
         return render_template('users.html',users=rows)
+        
     @app.route('/user/new', methods=["GET"])
     def user_new_get():
         return render_template('newuser.html')
@@ -134,6 +153,18 @@ def create_app(test_config=None):
         print(username, password, confirmpassword)
         
         cursor = connection.cursor()
+        
+        sql = '''SELECT Count() FROM users WHERE username=?'''
+        cursor.execute(sql, (username,))
+        numberOfRows = cursor.fetchone()[0]
+        print("number of rows for users is",numberOfRows)
+        
+        if numberOfRows != 0:
+           print("Username already exists")
+           flash("User "+username+" already exists")
+           print("redirecting")
+           return redirect("/user/new")
+           
         
         sql='''INSERT INTO users(username,password) VALUES (?,?)'''
 
