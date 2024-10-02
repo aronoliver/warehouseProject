@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>Create Account</h1>
+  <h1>Luo tili</h1>
 {% endblock %}
 
 {% block content %}
   <form id="userForm" action="/user/new" method="post">
-    <label for="username">Username:</label><br>
+    <label for="username">Käyttäjänimi:</label><br>
     <input type="text" id="username" name="username" required><br><br>
 
-    <label for="password">Password:</label><br>
+    <label for="password">Salasana:</label><br>
     <input type="password" id="password" name="password" required><br>
 
-    <label for="confirmpassword">Confirm Password:</label><br>
+    <label for="confirmpassword">Vahvista salasana:</label><br>
     <input type="password" id="confirmpassword" name="confirmpassword" required><br><br>
 
-    <button type="button" id="createButton" class="btn btn-danger" onclick="submitForm()">Create</button>
+    <button type="button" id="createButton" class="btn btn-danger" onclick="submitForm()">Luo</button>
   </form>
 
   <script>
@@ -50,3 +50,4 @@
     document.getElementById('confirmpassword').addEventListener('input', validateForm);
   </script>
 {% endblock %}
+

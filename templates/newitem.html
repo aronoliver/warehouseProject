@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>New Item</h1>
+  <h1>Uusi tuote</h1>
 {% endblock %}
 
 {% block content %}
-  <form  action="/item/new" method="post">
-  <label for="location">Location:</label><br>
+  <form action="/item/new" method="post">
+  <label for="location">Sijainti:</label><br>
   <input type="text" id="location" name="location"><br>
   
-  <label for="description">Description:</label><br>
+  <label for="description">Kuvaus:</label><br>
   <input type="text" id="description" name="description"><br>
 
-  <label for="amount">Amount:</label><br>
+  <label for="amount">Määrä:</label><br>
   <input type="integer" id="amount" name="amount"><br>
   
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <button type="submit" class="btn btn-primary">Luo</button>
 
 </form> 
 
 {% endblock %}
+
