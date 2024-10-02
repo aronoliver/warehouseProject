@@ -17,7 +17,7 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS picklist;
 
 CREATE TABLE picklist (
-    picklistnumber INTEGER,
+    picklistnumber TEXT NOT NULL,
     assignto TEXT NOT NULL,
    location TEXT NOT NULL,
    description TEXT NOT NULL,

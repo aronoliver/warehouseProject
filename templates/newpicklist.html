@@ -5,25 +5,33 @@
 {% endblock %}
 
 {% block content %}
+
+
   <form  action="/picklist/new" method="post">
   
   <label for="picklistnumber">picklistnumber:</label><br>
   <input type="integer" id="picklistnumber" name="picklistnumber"><br>
   
   <label for="assignto">assignto:</label><br>
-  <input type="text" id="assignto" name="assignto"><br>
+  <select type="text" id="assignto" name="assignto">
+      {% for u in users %}
+              <option value={{ u[0] }}>{{ u[0] }}</option>
+      {% endfor %}
+  </select><br>
   
-  <label for="location">location:</label><br>
-  <input type="text" id="location" name="location"><br>
-
-  <label for="description">description:</label><br>
-  <input type="text" id="description" name="description"><br>
+ 
   
-  <label for="amount">Amount:</label><br>
+  
+    <label for="warehouseitem">assignto:</label><br>
+  <select type="text" id="warehouseitem" name="warehouseitem">
+      {% for i in items %}
+              <option value={{ i[0] }},{{ i[1] }}>{{ i[0] }} {{ i[1] }} ( {{ i[2] }} available ) </option>
+      {% endfor %}
+  </select><br>
+  
+    <label for="amount">Amount:</label><br>
   <input type="integer" id="amount" name="amount"><br>
   
-  <label for="collected">collected:</label><br>
-  <input type="checkbox" id="collected" name="collected"><br>
   
     <input type="submit" value="Create">
 

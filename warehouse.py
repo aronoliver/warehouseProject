@@ -197,23 +197,37 @@ def create_app(test_config=None):
         cursor = connection.cursor()
         rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=? ORDER BY picklistnumber ASC, location ASC, description ASC", (picklistnumber))
 
-        return render_template('picklist.html',picklist=rows, picklistnumber=picklistnumber)
+        return render_template('picklists.html',picklist=rows, picklistnumber=picklistnumber)
         
         
     @app.route('/picklist/new', methods=["GET"])
     def picklist_new_get():
-        return render_template('newpicklist.html')
+        cursor = connection.cursor()
+        users = cursor.execute("SELECT username FROM users")
+        
+        cursor = connection.cursor()
+        items = cursor.execute("SELECT * FROM warehouseitems")
+   
+   
+   
+        return render_template('newpicklist.html',users=users, items = items)
+
+
+
+
 
     @app.route('/picklist/new', methods=["POST"])
     def picklist_new_post():
         picklistnumber = request.form.get("picklistnumber")
         assignto = request.form.get("assignto")
-        location = request.form.get("location")
-        description = request.form.get("description")
+        warehouseitem = request.form.get("warehouseitem")
         amount = request.form.get("amount")
-        collected = request.form.get("collected")
-       
-        print(picklistnumber, assignto, location, description, amount, collected)
+      
+        description = warehouseitem.split(",")[1]
+        location = warehouseitem.split(",")[0]
+        
+        collected = False
+        print(picklistnumber, assignto, warehouseitem)
         
         cursor = connection.cursor()
         
@@ -224,7 +238,7 @@ def create_app(test_config=None):
         
         print("database insert result is ",result)
                 
-        return redirect("/picklist")
+        return redirect("/picklists")
         
         
     
