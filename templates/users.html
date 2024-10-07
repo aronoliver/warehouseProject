@@ -5,11 +5,23 @@
 {% endblock %}
 
 {% block content %}
-       {% for i in users %}
-
-           {{ i[0] }} - {{ i[1] }} 
-           <hr/>
-
-    {% endfor %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>username</th>
+            <th>password</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in users %}
+        <tr>
+            <td>{{ i[0] }}</td>
+            <td>{{ i[1] }}</td>
+            <td> <a href=/user/delete/{{ i[0] }}> <button type="button">Delete!</button> </a> </td>
+            <td> <a href=/user/resetpassword/{{ i[0] }}> <button type="button">reset password!</button> </a> </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
 

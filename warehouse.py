@@ -1,14 +1,17 @@
 import os
 
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, session
 
 import sqlite3
+
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.secret_key = "ThisShouldBeRandomOrChanged"
+
+    
     #app.config.from_mapping(
     #    SECRET_KEY='dev',
     #    DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
@@ -38,6 +41,10 @@ def create_app(test_config=None):
  # THESE FUNCTIONS FOR MANIPULATING THE DATABASE
     @app.route('/items', methods=["GET"])
     def get_items():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
+           
         cursor = connection.cursor()
         rows = cursor.execute("SELECT * FROM warehouseitems ORDER BY location ASC, description ASC")
 
@@ -45,6 +52,9 @@ def create_app(test_config=None):
 
     @app.route('/item/new', methods=["GET"])
     def item_new_get():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         return render_template('newitem.html')
 
     @app.route('/item/new', methods=["POST"])
@@ -135,6 +145,9 @@ def create_app(test_config=None):
  # THESE FUNCTIONS FOR MANIPULATING THE USERS
     @app.route('/users', methods=["GET"])
     def get_users():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("SELECT * FROM users")
 
@@ -142,6 +155,9 @@ def create_app(test_config=None):
         
     @app.route('/user/new', methods=["GET"])
     def user_new_get():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         return render_template('newuser.html')
 
     @app.route('/user/new', methods=["POST"])
@@ -174,12 +190,87 @@ def create_app(test_config=None):
         print("database insert result is ",result)
                 
         return redirect("/users")
+    
+    @app.route('/user/delete/<user>', methods=["GET"])
+    def delete_user(user):
+        cursor = connection.cursor()
+        rows = cursor.execute("DELETE FROM users WHERE username=?", (user,))
+
+        return redirect("/users")
+        
+        
+    @app.route('/user/resetpassword/<user>', methods=["GET"])
+    def reset_password(user):
+         return render_template('resetpassword.html',user=user)
+           
+        
+    @app.route('/user/resetpassword', methods=["POST"])
+    def reset_password_post():
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmpassword = request.form.get("confirmpassword")
+       
+        print(username, password, confirmpassword)
+        cursor = connection.cursor()
+        sql='''UPDATE users SET password=? WHERE username=?'''
+
+        result = cursor.execute(sql, (password,username) )
+        connection.commit()
+                   
+        return redirect("/users")
+                 
+        
+        
+# login
+
+    @app.route('/login', methods=["GET"])
+    def login():
+        return render_template('login.html')
+        
+ 
+    @app.route('/logout', methods=["GET"])
+    def logout():
+        session['loggedInUser'] = None   
+        return render_template('login.html')       
+        
+        
+    @app.route('/login', methods=["POST"])
+    def login_post():
+        username = request.form.get("username")
+        password = request.form.get("password")
+       
+        print(username, password)
+        
+        if username=="admin" and password=="admin1":
+           flash(username+" is now logged in")           
+           session['loggedInUser'] = username   
+           return redirect("/")
+              
+        
+        cursor = connection.cursor()
+        
+        sql = '''SELECT Count() FROM users WHERE username=? AND password=?'''
+        cursor.execute(sql, (username,password,))
+        numberOfRows = cursor.fetchone()[0]
+        print("number of rows for users is",numberOfRows)
+        
+        if numberOfRows == 0:
+           flash("Either "+username+" doesn't exist or password doesn't exist")
+           return redirect("/login")
+           
+        flash(username+" is now logged in")           
+        session['loggedInUser'] = username   
+           
+  
+                
+        return redirect("/")
+        
+        
+        
         
 # T
     @app.route('/', methods=["GET"])
     def home():
-
-
         return render_template('index.html')
         
         
@@ -187,13 +278,25 @@ def create_app(test_config=None):
 # THESE FUNCTIONS FOR MANIPULATING THE USERS
     @app.route('/picklists', methods=["GET"])
     def get_picklists():
+        rows = None        
         cursor = connection.cursor()
-        rows = cursor.execute("SELECT * FROM picklist ORDER BY picklistnumber ASC, location ASC, description ASC")
-
+        
+        if session["loggedInUser"] == "admin":
+            rows = cursor.execute("SELECT * FROM picklist ORDER BY picklistnumber ASC, location ASC, description ASC")
+        elif session["loggedInUser"] == None:
+            flash("Nothing logged in. Please log in and try again")
+            return redirect("/")
+        else:
+            user = session["loggedInUser"]
+            rows = cursor.execute("SELECT * FROM picklist WHERE assignto=? ORDER BY picklistnumber ASC, location ASC, description ASC",(user,))
+            
         return render_template('picklists.html',picklist=rows)
         
     @app.route('/picklist/<picklistnumber>', methods=["GET"])
     def get_picklist(picklistnumber):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=? ORDER BY picklistnumber ASC, location ASC, description ASC", (picklistnumber))
 
@@ -202,6 +305,9 @@ def create_app(test_config=None):
         
     @app.route('/picklist/new', methods=["GET"])
     def picklist_new_get():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         users = cursor.execute("SELECT username FROM users")
         
@@ -237,8 +343,10 @@ def create_app(test_config=None):
         connection.commit()
         
         print("database insert result is ",result)
-                
-        return redirect("/picklists")
+         
+        flash("Item "+description+" added to picklist "+picklistnumber+" for user "+assignto)
+         
+        return redirect("/picklist/new")
         
         
     
