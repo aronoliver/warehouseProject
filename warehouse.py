@@ -316,10 +316,19 @@ def create_app(test_config=None):
         
     @app.route('/picklist/<picklistnumber>', methods=["GET"])
     def get_picklist(picklistnumber):
-        if session["loggedInUser"] != "admin":
-           flash("Not authorised")
-           return redirect("/")
         cursor = connection.cursor()
+        
+        rows = cursor.execute("SELECT assignto FROM picklist WHERE picklistnumber=?", (picklistnumber,))
+        owner = rows.fetchone()[0]
+    
+        print("Pick list owner is ",owner,".")
+        print("logged in as ",session["loggedInUser"])
+        print("Authorised is ",  session["loggedInUser"] == "admin" or session["loggedInUser"] == owner )
+    
+        if session["loggedInUser"] != "admin" and session["loggedInUser"] != owner:
+           flash("Not authorised")
+           return redirect("/picklists")
+           
         rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=? ORDER BY picklistnumber ASC, location ASC, description ASC", (picklistnumber,))
 
         return render_template('picklists.html',picklist=rows, picklistnumber=picklistnumber)
@@ -329,7 +338,8 @@ def create_app(test_config=None):
     def picklist_new_get():
         if session["loggedInUser"] != "admin":
            flash("Not authorised")
-           return redirect("/")
+           return redirect("/picklists")
+           
         cursor = connection.cursor()
         users = cursor.execute("SELECT username FROM users")
         
@@ -348,7 +358,8 @@ def create_app(test_config=None):
     def picklist_new_post():
         if session["loggedInUser"] != "admin":
            flash("Not authorised")
-           return redirect("/")
+           return redirect("/picklists")
+           
         picklistnumber = request.form.get("picklistnumber")
         assignto = request.form.get("assignto")
         warehouseitem = request.form.get("warehouseitem")
@@ -383,13 +394,14 @@ def create_app(test_config=None):
         cursor = connection.cursor()
         rows = cursor.execute("DELETE FROM picklist WHERE picklistnumber=? AND location=? AND description=?", (plist,loc,des))
 
-        return redirect("/picklists")
+        return redirect(request.referrer)                
     
     @app.route('/picklist/increase/<plist>/<loc>/<des>', methods=["GET"])
     def increase_amount_picklist(plist,loc,des):
         if session["loggedInUser"] != "admin":
            flash("Not authorised")
-           return redirect("/")
+           return redirect(request.referrer)   
+                        
         cursor = connection.cursor()
         rows = cursor.execute("SELECT amount FROM picklist WHERE  picklistnumber=? AND location=? AND description=?", (plist,loc,des))
         result = rows.fetchone()
@@ -404,13 +416,14 @@ def create_app(test_config=None):
         result = cursor.execute(sql, (new_amount, plist, loc, des ))
         connection.commit()       
                 
-        return redirect("/picklists")
+        return redirect(request.referrer)                
 
     @app.route('/picklist/decrease/<plist>/<loc>/<des>', methods=["GET"])
     def decrease_amount_picklist(plist,loc,des):
         if session["loggedInUser"] != "admin":
            flash("Not authorised")
-           return redirect("/")
+           return redirect(request.referrer)   
+           
         cursor = connection.cursor()
         rows = cursor.execute("SELECT amount FROM picklist WHERE picklistnumber=? AND location=? AND description=?", (plist,loc,des))
         result = rows.fetchone()
@@ -425,7 +438,7 @@ def create_app(test_config=None):
         result = cursor.execute(sql, (new_amount, plist, loc, des ))
         connection.commit()
         
-        return redirect("/picklists")  
+        return redirect(request.referrer)                
     
     @app.route('/picklist/complete/<plist>/<loc>/<des>', methods=["GET"])
     def complete_picklist(plist,loc,des):
@@ -435,8 +448,9 @@ def create_app(test_config=None):
         
         result = cursor.execute(sql, (plist, loc, des ))
         connection.commit()       
-                
-        return redirect("/picklists")
+
+        return redirect(request.referrer)                
+
     
     
     return app
