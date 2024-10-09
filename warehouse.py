@@ -41,9 +41,6 @@ def create_app(test_config=None):
  # THESE FUNCTIONS FOR MANIPULATING THE DATABASE
     @app.route('/items', methods=["GET"])
     def get_items():
-        if session["loggedInUser"] != "admin":
-           flash("Not authorised")
-           return redirect("/")
            
         cursor = connection.cursor()
         rows = cursor.execute("SELECT * FROM warehouseitems ORDER BY location ASC, description ASC")
@@ -59,6 +56,10 @@ def create_app(test_config=None):
 
     @app.route('/item/new', methods=["POST"])
     def item_new_post():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
+           
         location = request.form.get("location")
         description = request.form.get("description")
         
@@ -96,6 +97,9 @@ def create_app(test_config=None):
 
     @app.route('/item/delete/<loc>/<des>', methods=["GET"])
     def delete_item(loc,des):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("DELETE FROM warehouseitems WHERE location=? AND description=?", (loc,des))
 
@@ -103,6 +107,9 @@ def create_app(test_config=None):
 
     @app.route('/item/increase/<loc>/<des>', methods=["GET"])
     def increase_amount(loc,des):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("SELECT amount FROM warehouseitems WHERE location=? AND description=?", (loc,des))
         result = rows.fetchone()
@@ -121,6 +128,9 @@ def create_app(test_config=None):
 
     @app.route('/item/decrease/<loc>/<des>', methods=["GET"])
     def decrease_amount(loc,des):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("SELECT amount FROM warehouseitems WHERE location=? AND description=?", (loc,des))
         result = rows.fetchone()
@@ -162,6 +172,9 @@ def create_app(test_config=None):
 
     @app.route('/user/new', methods=["POST"])
     def user_new_post():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         username = request.form.get("username")
         password = request.form.get("password")
         confirmpassword = request.form.get("confirmpassword")
@@ -193,6 +206,9 @@ def create_app(test_config=None):
     
     @app.route('/user/delete/<user>', methods=["GET"])
     def delete_user(user):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("DELETE FROM users WHERE username=?", (user,))
 
@@ -201,11 +217,17 @@ def create_app(test_config=None):
         
     @app.route('/user/resetpassword/<user>', methods=["GET"])
     def reset_password(user):
-         return render_template('resetpassword.html',user=user)
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
+        return render_template('resetpassword.html',user=user)
            
         
     @app.route('/user/resetpassword', methods=["POST"])
     def reset_password_post():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         username = request.form.get("username")
         password = request.form.get("password")
         confirmpassword = request.form.get("confirmpassword")
@@ -298,7 +320,7 @@ def create_app(test_config=None):
            flash("Not authorised")
            return redirect("/")
         cursor = connection.cursor()
-        rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=? ORDER BY picklistnumber ASC, location ASC, description ASC", (picklistnumber))
+        rows = cursor.execute("SELECT * FROM picklist WHERE picklistnumber=? ORDER BY picklistnumber ASC, location ASC, description ASC", (picklistnumber,))
 
         return render_template('picklists.html',picklist=rows, picklistnumber=picklistnumber)
         
@@ -324,6 +346,9 @@ def create_app(test_config=None):
 
     @app.route('/picklist/new', methods=["POST"])
     def picklist_new_post():
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         picklistnumber = request.form.get("picklistnumber")
         assignto = request.form.get("assignto")
         warehouseitem = request.form.get("warehouseitem")
@@ -352,6 +377,9 @@ def create_app(test_config=None):
     
     @app.route('/picklist/delete/<plist>/<loc>/<des>', methods=["GET"])
     def delete_picklist(plist,loc,des):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("DELETE FROM picklist WHERE picklistnumber=? AND location=? AND description=?", (plist,loc,des))
 
@@ -359,6 +387,9 @@ def create_app(test_config=None):
     
     @app.route('/picklist/increase/<plist>/<loc>/<des>', methods=["GET"])
     def increase_amount_picklist(plist,loc,des):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("SELECT amount FROM picklist WHERE  picklistnumber=? AND location=? AND description=?", (plist,loc,des))
         result = rows.fetchone()
@@ -377,6 +408,9 @@ def create_app(test_config=None):
 
     @app.route('/picklist/decrease/<plist>/<loc>/<des>', methods=["GET"])
     def decrease_amount_picklist(plist,loc,des):
+        if session["loggedInUser"] != "admin":
+           flash("Not authorised")
+           return redirect("/")
         cursor = connection.cursor()
         rows = cursor.execute("SELECT amount FROM picklist WHERE picklistnumber=? AND location=? AND description=?", (plist,loc,des))
         result = rows.fetchone()
@@ -392,5 +426,17 @@ def create_app(test_config=None):
         connection.commit()
         
         return redirect("/picklists")  
+    
+    @app.route('/picklist/complete/<plist>/<loc>/<des>', methods=["GET"])
+    def complete_picklist(plist,loc,des):
+     
+        cursor = connection.cursor()
+        sql='''UPDATE picklist SET collected=1 WHERE picklistnumber=? AND location=? AND description=?'''
+        
+        result = cursor.execute(sql, (plist, loc, des ))
+        connection.commit()       
+                
+        return redirect("/picklists")
+    
     
     return app

@@ -8,7 +8,7 @@
 <form method="GET" action="">
     <label for="search">Haku:</label><br>
     <input type="text" id="search" name="search" value="{{ request.args.get('search', '') }}">
-    <button type="submit">Hae</button>
+    <button type="submit" class="btn btn-secondary">Hae</button>
 </form>
 <br>
 <table class="table table-striped">
@@ -28,8 +28,8 @@
                 <td>{{ i[1] }}</td>
                 <td>{{ i[2] }}</td>
                 <td> <a href="/item/delete/{{ i[0] }}/{{ i[1] }}"> <button type="button" class="btn btn-danger">Poista!</button> </a> </td>
-                <td> <a href="/item/increase/{{ i[0] }}/{{ i[1] }}"> <button type="button">Lisää yksi!</button> </a> </td>
-                <td> <a href="/item/decrease/{{ i[0] }}/{{ i[1] }}"> <button type="button">Poista yksi!</button> </a> </td>
+                <td> <a href="/item/increase/{{ i[0] }}/{{ i[1] }}"> <button type="button" class="btn btn-secondary">Lisää yksi!</button> </a> </td>
+                <td> <a href="/item/decrease/{{ i[0] }}/{{ i[1] }}"> <button type="button" class="btn btn-secondary">Poista yksi!</button> </a> </td>
             </tr>
             {% endif %}
         {% endfor %}
